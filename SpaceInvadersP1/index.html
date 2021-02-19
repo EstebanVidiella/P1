@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Meteoritos</title>
+    <script>
+        var playing=true;
+        var velocidadNave=20;
+        var numeroDisparo=0;
+
+        window.addEventListener("keydown",(k)=>{
+            if(playing){
+                if(k.key==="1"){
+                if(playing){
+                    playing=false
+                    console.log("no");
+                }else{
+                    playing=true;
+                    move();
+                }
+            }
+            if(k.key==="ArrowLeft"){
+                
+                var pos=document.getElementById("nave").style.left;
+                var position=parseInt(pos.replace("px",""));
+                if(position<0){
+
+                }else{
+                    document.getElementById("nave").style.left=position-velocidadNave+"px";
+                }           
+            }
+            if(k.key==="ArrowRight"){
+                var pos=document.getElementById("nave").style.left;
+                var position=parseInt(pos.replace("px",""));
+                if(position>window.screen.width){
+
+                }else{
+                    document.getElementById("nave").style.left=position+velocidadNave+"px";
+                }
+            }
+            if(k.code==="Space"){
+                disparar();
+                document.getElementById("meteorito-6").style.top="100px";
+                var audio =  new Audio("disparo.mp3");
+                audio.play();
+            }
+        }
+    });
+        
+        var speed=[1,6,3,7,4,7,8,9,5,3,4,7,8,9,2,4,6,7,8,4,3,2,6,7,8,6,9,8,7,8,6,5,4,3,2,6,7,1,8,7,6,5,4,3,2,8,9]
+        window.onload=inicio;
+        
+        function inicio(){
+            var Meteoritos=[...document.getElementsByClassName("meteorito")];
+            Meteoritos.forEach((element)=>{
+                var randomX=Math.floor(Math.random() * 90);
+                console.log(element.id);
+                document.getElementById(element.id).style.left=randomX+"%";
+                document.getElementById(element.id).style.top="-10px"
+            });
+            var Naves=[...document.getElementsByClassName("nave-enemiga")]
+            Naves.forEach(element => {
+                var randomX=Math.floor(Math.random() * 90);
+                console.log(element.id);
+                document.getElementById(element.id).style.left=randomX+"%";
+                document.getElementById(element.id).style.top="-10px"
+            });
+            document.getElementById("nave").style.top="700px"
+            document.getElementById("nave").style.left="250px"
+            move();
+        }
+
+        var k=9;
+        function crearNave() {
+            var randomX=Math.floor(Math.random() * 80);
+            var nave=document.createElement("div");
+            nave.className="nave-enemiga";
+            nave.id="nave-"+k;
+            k++;
+            nave.style.top="10px";
+            nave.style.left=randomX+"px";
+            document.body.append(nave);            
+        }
+
+        function move(){
+            var Meteoritos=[...document.getElementsByClassName("meteorito")];
+            var disparos=[...document.getElementsByClassName("disparo")];
+            var j = 0;
+            Meteoritos.forEach((element)=>{
+                var positionY=document.getElementById(element.id).style.top;
+                var pos=parseInt(positionY.replace("px",""));
+                if(pos>window.screen.height-200){
+                    var randomX=Math.floor(Math.random() * 80);
+                    document.getElementById(element.id).style.left=randomX+"%";
+                    pos=0;
+                }
+                document.getElementById(element.id).style.top=pos+speed[j]+"px";
+                j++;
+                isCollapsed(document.getElementById("nave"),document.getElementById(element.id))
+            });
+            if(disparos.length>0){
+                disparos.forEach(element => {
+                    var positionY=document.getElementById(element.id).style.top;
+                    var pos=parseInt(positionY.replace("px",""));
+                    if(pos<10){
+                        document.body.removeChild(element)
+                    }else{
+                        document.getElementById(element.id).style.top=pos-velocidadNave+"px";
+                    }
+                    var Naves=[...document.getElementsByClassName("nave-enemiga")];
+                    Naves.forEach(element1 => {
+                        if(hit(element1,element)){  
+                            document.body.removeChild(element);
+                            document.getElementById(element1.id).style.backgroundImage="url(explosion.gif)";
+                            setTimeout(()=>{
+                                document.body.removeChild(element1);
+                            },500);
+                            var score=document.getElementById("score").innerHTML;
+                            var NScore=parseInt(score);
+                            NScore=NScore+100;
+                            document.getElementById("score").innerHTML=NScore;
+                        }else{      
+                        }
+                    });
+                });
+            }
+
+            var aux=0;
+            var Naves=[...document.getElementsByClassName("nave-enemiga")];
+            Naves.forEach(element => {
+                var positionY=document.getElementById(element.id).style.top;
+                var pos=parseInt(positionY.replace("px",""));
+                var positionX=document.getElementById(element.id).style.left;
+                var posX=parseInt(positionX.replace("px",""));
+                if(pos>window.screen.height-200){
+                    var randomX=Math.floor(Math.random() * (window.screen.width-200));
+                    posX=randomX;
+                    document.getElementById(element.id).style.left=randomX+"px";
+                    pos=0;
+                }
+                if(aux==speed.length){
+                    aux=0;
+                }
+                if(posX>window.screen.width-200){
+                    var randomX=Math.floor(Math.random() * (window.screen.width-200));
+                    posX=randomX;
+                    document.getElementById(element.id).style.left=randomX+"px";
+                    pos=0;
+                }
+                if(posX<0){
+                    var randomX=Math.floor(Math.random() * (window.screen.width-200));
+                    posX=randomX;
+                    document.getElementById(element.id).style.left=randomX+"px";
+                    pos=0;
+                }
+    
+                //debugger;
+                var direc=Math.floor(Math.random() * 100);
+                var direc2=Math.floor(Math.random() * 200);
+
+                var id=parseInt(element.id.replace("nave-",""));
+                if(id%2==0){
+                    
+                    document.getElementById(element.id).style.left=posX+5+"px";
+                }else{
+                    document.getElementById(element.id).style.left=posX-5+"px";
+                }
+                document.getElementById(element.id).style.top=pos+speed[aux]+"px";
+                aux++;
+                if(numeroDisparo%30==0){
+                    disparoEnemigo(element);
+                }
+                isCollapsed(document.getElementById("nave"),element);
+            });
+            if(numeroDisparo%100==0){
+                crearNave();
+            }
+
+            var disparosEnemigos=[...document.getElementsByClassName("disparo-enemigo")];
+            if(disparosEnemigos.length>0){
+                disparosEnemigos.forEach(element => {
+                    var positionY=element.style.top;
+                    var pos=parseInt(positionY.replace("px",""));
+                    if(pos>window.screen.height-150){
+                        document.body.removeChild(element);
+                    }else{
+                        element.style.top=pos+velocidadNave+"px";
+                        isCollapsed(document.getElementById("nave"),document.getElementById(element.id));
+                    }
+                });
+            }
+            if(playing){
+                var score=document.getElementById("score").innerHTML;
+                var NScore=parseInt(score);
+                NScore++;
+                document.getElementById("score").innerHTML=NScore;
+                numeroDisparo++;
+                setTimeout(move,30);
+            }
+        }
+
+        var i = 0;
+        function disparar(){
+            var x = document.getElementById("nave").style.left;
+            var y = document.getElementById("nave").style.top
+            var disparo=document.createElement("div");
+            disparo.className="disparo";
+            disparo.style.top=y;
+            disparo.style.left=x;
+            document.body.append(disparo);
+        }
+
+        var dis=0;
+        function disparoEnemigo(nave) {
+            var x = nave.style.left;
+            var y = nave.style.top;
+            var disparo=document.createElement("div");
+            disparo.id="disparo-"+dis.toString();
+            dis++;
+
+            disparo.className="disparo-enemigo"
+            disparo.style.top=y;
+            disparo.style.left=x;
+            document.body.append(disparo);
+        }
+
+        function eliminarNave(nave) {
+            try {
+                var audio= new Audio("explosion.mp3");
+                audio.play();
+                document.body.removeChild(nave);
+            } catch (error) {  
+            }
+        }
+
+        function isCollapsed(nave, meteorito){
+            var object_1 = nave.getBoundingClientRect();
+            var object_2 = meteorito.getBoundingClientRect(); 
+
+            if (object_1.left < object_2.left + object_2.width  && object_1.left + object_1.width  > object_2.left &&
+                    object_1.top < object_2.top + object_2.height && object_1.top + object_1.height > object_2.top) {
+                playing=false;
+                document.getElementById("nave").style.backgroundImage="url(explosion.gif)";
+                document.getElementById("play").style.visibility="visible";
+                var audio= new Audio("explosion.mp3");
+                audio.play();
+            }
+            else{
+            }
+        }
+        function hit(nave, disparo){
+            var object_1 = nave.getBoundingClientRect();
+            var object_2 = disparo.getBoundingClientRect();
+    
+            if (object_1.left < object_2.left + object_2.width  && object_1.left + object_1.width  > object_2.left &&
+                    object_1.top < object_2.top + object_2.height && object_1.top + object_1.height > object_2.top) {
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+
+        function reGame() {
+            location.reload();
+        }
+
+        var i = 0;
+        function disparar() {
+            var disparo=document.createElement("div");
+            disparo.id=i;
+            i++;
+            disparo.className="disparo";
+            disparo.style.top=document.getElementById("nave").style.top;
+            disparo.style.left=document.getElementById("nave").style.left;
+            document.body.appendChild(disparo);
+        }
+        
+    </script>
+</head>
+<body>
+    <div class="meteorito" id="meteorito-0"></div>
+    <div class="meteorito" id="meteorito-1"></div>
+    <div class="meteorito" id="meteorito-2"></div>
+    <div class="meteorito" id="meteorito-3"></div>
+    <div class="meteorito" id="meteorito-4"></div>
+    <div class="meteorito" id="meteorito-5"></div>
+    <div class="meteorito" id="meteorito-6"></div>
+    <div class="meteorito" id="meteorito-7"></div>
+    <div class="meteorito" id="meteorito-8"></div>
+    <div class="meteorito" id="meteorito-9"></div>
+    <div class="meteorito" id="meteorito-10"></div>
+    <div class="meteorito" id="meteorito-11"></div>
+    <div class="meteorito" id="meteorito-12"></div>
+    <div class="meteorito" id="meteorito-13"></div>
+
+    
+    <div class="nave" id="nave"></div>
+    <div class="score" id="score">0</div>
+    <div class="nave-enemiga" id="nave-1"></div>
+    <div class="nave-enemiga" id="nave-2"></div>
+    <div class="nave-enemiga" id="nave-3"></div>
+    <div class="nave-enemiga" id="nave-4"></div>
+    <div class="nave-enemiga" id="nave-5"></div>
+
+
+    <div class="play" id="play" onclick="reGame()">PLAY AGAIN</div>
+</body>
+</html>
